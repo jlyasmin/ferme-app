@@ -9,7 +9,7 @@ USERS_FILE = "users.json"
 DATA_FILE  = "data.json"
 sessions   = {}
 
-# ── helpers ────────────────────────────────────────────────────────────────
+# ── helpers ─────────────────────────────────────────────────────────────[...]
 def load(f, d):
     return json.load(open(f, encoding="utf-8")) if os.path.exists(f) else d
 
@@ -51,7 +51,7 @@ def export_excel(username):
     for col,w in zip("ABCD",[14,12,14,16]): ws.column_dimensions[col].width=w
     path = f"/tmp/animaux_{username}.xlsx"; wb.save(path); return path
 
-# ── HTML ───────────────────────────────────────────────────────────────────
+# ── HTML ──────────────────────────────────────────────────────────────[...]
 CSS_BASE = """
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -347,7 +347,6 @@ const token=localStorage.getItem('token');
 const nom=localStorage.getItem('nom');
 const username=localStorage.getItem('username');
 if(!token){{window.location.href='/';}}
-document.getElementById('tnon').textContent='Bonjour, '+nom+' 👋';
 
 let animaux=[],filtre='tous',lastHL=null;
 
@@ -467,10 +466,15 @@ async function telechargerExcel(){{
 }}
 
 function logout(){{localStorage.clear();window.location.href='/';}}
-charger();
+
+// Initialiser la page quand elle est complètement chargée
+window.addEventListener('load',function(){{
+  if(nom)document.getElementById('tnon').textContent='Bonjour, '+nom+' 👋';
+  charger();
+}});
 </script></body></html>"""
 
-# ── Serveur ─────────────────────────────────────────────────────────────────
+# ── Serveur ─────────────────────────────────────────────────────────────[...]
 class H(BaseHTTPRequestHandler):
     def log_message(self,*a): pass
     def tok(self): return self.headers.get("X-Token","")
@@ -601,4 +605,3 @@ if __name__=="__main__":
     print(f"   ⏹️  Ctrl+C pour arrêter\n")
     try: server.serve_forever()
     except KeyboardInterrupt: print("\n✅ Arrêtée.")
-

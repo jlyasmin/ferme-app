@@ -143,14 +143,19 @@ function hide(){{document.getElementById('msg').className='msg';}}
 async function login(){{
   const u=document.getElementById('l-user').value.trim();
   const m=document.getElementById('l-mdp').value;
-  if(!u||!m){{show('Remplis tous les champs.',false);return;}}
-  const r=await post('/api/login',{{username:u,mdp:m}});
-  if(r.ok){{
-    localStorage.setItem('token',r.token);
-    localStorage.setItem('nom',r.nom);
-    localStorage.setItem('username',r.username);
-    window.location.href='/app';
-  }}else show(r.msg||'Identifiant ou mot de passe incorrect.',false);
+  if(!u||!m){{show('⚠️ Remplis tous les champs.',false);return;}}
+  hide();
+  try{{
+    const r=await post('/api/login',{{username:u,mdp:m}});
+    if(r.ok){{
+      localStorage.setItem('token',r.token);
+      localStorage.setItem('nom',r.nom);
+      localStorage.setItem('username',r.username);
+      window.location.href='/app';
+    }}else show('❌ '+(r.msg||'Identifiant ou mot de passe incorrect.'),false);
+  }}catch(e){{
+    show('❌ Erreur de connexion au serveur. Réessaie dans 30 secondes.',false);
+  }}
 }}
 
 async function register(){{
@@ -158,16 +163,24 @@ async function register(){{
   const u=document.getElementById('r-user').value.trim();
   const m=document.getElementById('r-mdp').value;
   const m2=document.getElementById('r-mdp2').value;
-  if(!nom||!u||!m||!m2){{show('Remplis tous les champs.',false);return;}}
-  if(m!==m2){{show('Les mots de passe ne correspondent pas.',false);return;}}
-  if(m.length<4){{show('Mot de passe trop court (minimum 4 caractères).',false);return;}}
-  if(!/^[a-zA-Z0-9_]+$/.test(u)){{show('Identifiant : lettres, chiffres et _ uniquement.',false);return;}}
-  const r=await post('/api/register',{{nom,username:u,mdp:m}});
-  if(r.ok){{
-    show('Compte créé ! Tu peux maintenant te connecter.',true);
-    showTab('login',document.querySelectorAll('.tab')[0]);
-    document.getElementById('l-user').value=u;
-  }}else show(r.msg||'Erreur lors de la création.',false);
+  if(!nom||!u||!m||!m2){{show('⚠️ Remplis tous les champs.',false);return;}}
+  if(m!==m2){{show('⚠️ Les mots de passe ne correspondent pas.',false);return;}}
+  if(m.length<4){{show('⚠️ Mot de passe trop court (minimum 4 caractères).',false);return;}}
+  if(!/^[a-zA-Z0-9_]+$/.test(u)){{show('⚠️ Identifiant : lettres, chiffres et _ uniquement.',false);return;}}
+  hide();
+  try{{
+    const r=await post('/api/register',{{nom,username:u,mdp:m}});
+    if(r.ok){{
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('login').classList.add('active');
+      document.querySelectorAll('.tab')[0].classList.add('active');
+      document.getElementById('l-user').value=u;
+      show('✅ Compte créé ! Connecte-toi avec ton identifiant : '+u,true);
+    }}else show('❌ '+(r.msg||'Erreur lors de la création.'),false);
+  }}catch(e){{
+    show('❌ Erreur de connexion au serveur. Réessaie dans 30 secondes.',false);
+  }}
 }}
 
 async function post(url,body){{
@@ -588,3 +601,4 @@ if __name__=="__main__":
     print(f"   ⏹️  Ctrl+C pour arrêter\n")
     try: server.serve_forever()
     except KeyboardInterrupt: print("\n✅ Arrêtée.")
+
